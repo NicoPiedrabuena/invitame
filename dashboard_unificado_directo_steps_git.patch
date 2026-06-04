@@ -1,0 +1,264 @@
+diff --git a/app/Http/Controllers/InvitationController.php b/app/Http/Controllers/InvitationController.php
+index 8bd6cd8..2643d66 100644
+--- a/app/Http/Controllers/InvitationController.php
++++ b/app/Http/Controllers/InvitationController.php
+@@ -15,16 +15,16 @@ use Inertia\Response;
+ class InvitationController extends Controller
+ {
+     /**
+-     * Display a listing of the resource.
++     * Display the authenticated user's dashboard with their invitations.
+      */
+-    public function index(): Response
++    public function dashboard(): Response
+     {
+         $invitations = Invitation::query()
+             ->where('user_id', Auth::id())
+             ->latest()
+             ->get(['id', 'slug', 'title', 'subtitle', 'event_date', 'venue_name', 'created_at']);
+ 
+-        return Inertia::render('Invitations/Index', [
++        return Inertia::render('Dashboard', [
+             'invitations' => $invitations,
+         ]);
+     }
+@@ -276,7 +276,7 @@ class InvitationController extends Controller
+         $invitation = $this->ownedInvitation($invitation);
+         $invitation->delete();
+ 
+-        return redirect()->route('invitations.index')
++        return redirect()->route('dashboard')
+             ->with('status', 'Invitacion eliminada correctamente.');
+     }
+ 
+diff --git a/resources/js/Pages/Dashboard.vue b/resources/js/Pages/Dashboard.vue
+index 93b1792..2e46379 100644
+--- a/resources/js/Pages/Dashboard.vue
++++ b/resources/js/Pages/Dashboard.vue
+@@ -1,6 +1,13 @@
+ <script setup>
+ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+ import { Head, Link } from '@inertiajs/vue3';
++
++defineProps({
++    invitations: {
++        type: Array,
++        default: () => [],
++    },
++});
+ </script>
+ 
+ <template>
+@@ -8,26 +15,64 @@ import { Head, Link } from '@inertiajs/vue3';
+ 
+     <AuthenticatedLayout>
+         <template #header>
+-            <h2
+-                class="text-xl font-semibold leading-tight text-gray-800"
+-            >
+-                Dashboard
+-            </h2>
++            <div class="flex items-center justify-between gap-4">
++                <h2 class="text-xl font-semibold leading-tight text-gray-800">
++                    Dashboard
++                </h2>
++
++                <Link
++                    :href="route('invitations.create')"
++                    class="inline-flex items-center rounded-md bg-slate-900 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-white shadow-sm transition hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
++                >
++                    crear invitacion
++                </Link>
++            </div>
+         </template>
+ 
+-        <div class="py-6">
+-            <div class="mx-auto max-w-md px-4 sm:px-6 lg:px-8">
+-                <div class="rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-700 p-6 text-white shadow-xl">
+-                    <p class="text-xs uppercase tracking-[0.25em] text-slate-300">SaaS de invitaciones</p>
+-                    <h3 class="mt-3 text-2xl font-semibold leading-tight">Crea una invitación digital paso a paso</h3>
+-                    <p class="mt-3 text-sm text-slate-300">Diseñado para móviles, con un flujo guiado de 9 pasos para publicar tu evento en minutos.</p>
+-
+-                    <Link
+-                        :href="route('invitations.create')"
+-                        class="mt-6 flex w-full items-center justify-center rounded-2xl bg-amber-400 px-5 py-4 text-base font-semibold text-slate-950 transition active:scale-[0.99]"
+-                    >
+-                        Crear invitación
+-                    </Link>
++        <div class="py-8">
++            <div class="mx-auto max-w-5xl space-y-4 px-4 sm:px-6 lg:px-8">
++                <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
++                    <div class="border-b border-slate-100 px-5 py-4">
++                        <h3 class="text-base font-semibold text-slate-900">
++                            Invitaciones creadas previamente
++                        </h3>
++                        <p class="mt-1 text-sm text-slate-500">
++                            Administrá tus invitaciones, editá la información o abrí la vista pública.
++                        </p>
++                    </div>
++
++                    <div v-if="invitations.length" class="divide-y divide-slate-100">
++                        <div
++                            v-for="invitation in invitations"
++                            :key="invitation.id"
++                            class="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
++                        >
++                            <div>
++                                <p class="text-xs font-medium uppercase tracking-wide text-slate-500">
++                                    /{{ invitation.slug }}
++                                </p>
++                                <h4 class="mt-1 text-base font-semibold text-slate-900">
++                                    {{ invitation.title }}
++                                </h4>
++                                <p v-if="invitation.subtitle" class="mt-1 text-sm text-slate-600">
++                                    {{ invitation.subtitle }}
++                                </p>
++                            </div>
++
++                            <div class="flex items-center gap-4 text-sm font-medium">
++                                <Link :href="route('invitations.show', invitation.id)" class="text-sky-700 hover:text-sky-900">
++                                    Ver
++                                </Link>
++                                <Link :href="route('invitations.edit', invitation.id)" class="text-sky-700 hover:text-sky-900">
++                                    Editar
++                                </Link>
++                            </div>
++                        </div>
++                    </div>
++
++                    <p v-else class="px-5 py-8 text-sm text-slate-500">
++                        Todavía no tienes invitaciones.
++                    </p>
+                 </div>
+             </div>
+         </div>
+diff --git a/resources/js/Pages/Invitations/Create.vue b/resources/js/Pages/Invitations/Create.vue
+deleted file mode 100644
+index d4c102e..0000000
+--- a/resources/js/Pages/Invitations/Create.vue
++++ /dev/null
+@@ -1,41 +0,0 @@
+-<script setup>
+-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+-import InvitationForm from '@/Pages/Invitations/Partials/InvitationForm.vue';
+-import { Head, useForm } from '@inertiajs/vue3';
+-
+-const form = useForm({
+-    slug: '',
+-    title: '',
+-    subtitle: '',
+-    event_date: '',
+-    venue_name: '',
+-    google_maps_url: '',
+-    dress_code: '',
+-    bank_alias: '',
+-    drive_photos_url: '',
+-    spotify_playlist_url: '',
+-    theme_settings: {
+-        background_audio_url: '',
+-    },
+-});
+-
+-const submit = () => {
+-    form.post(route('invitations.store'));
+-};
+-</script>
+-
+-<template>
+-    <Head title="Crear invitacion" />
+-
+-    <AuthenticatedLayout>
+-        <template #header>
+-            <h2 class="text-xl font-semibold leading-tight text-gray-800">Crear invitacion</h2>
+-        </template>
+-
+-        <div class="py-8">
+-            <div class="mx-auto max-w-3xl rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+-                <InvitationForm :form="form" submit-label="Crear" @submit="submit" />
+-            </div>
+-        </div>
+-    </AuthenticatedLayout>
+-</template>
+diff --git a/resources/js/Pages/Invitations/Index.vue b/resources/js/Pages/Invitations/Index.vue
+deleted file mode 100644
+index 006fdd9..0000000
+--- a/resources/js/Pages/Invitations/Index.vue
++++ /dev/null
+@@ -1,52 +0,0 @@
+-<script setup>
+-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+-import { Head, Link } from '@inertiajs/vue3';
+-
+-defineProps({
+-    invitations: {
+-        type: Array,
+-        default: () => [],
+-    },
+-});
+-</script>
+-
+-<template>
+-    <Head title="Invitaciones" />
+-
+-    <AuthenticatedLayout>
+-        <template #header>
+-            <div class="flex items-center justify-between">
+-                <h2 class="text-xl font-semibold leading-tight text-gray-800">Invitaciones</h2>
+-                <Link
+-                    :href="route('invitations.create')"
+-                    class="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white"
+-                >
+-                    Nueva invitacion
+-                </Link>
+-            </div>
+-        </template>
+-
+-        <div class="py-8">
+-            <div class="mx-auto max-w-5xl space-y-3 px-4 sm:px-6 lg:px-8">
+-                <div
+-                    v-for="invitation in invitations"
+-                    :key="invitation.id"
+-                    class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+-                >
+-                    <p class="text-xs uppercase tracking-wide text-slate-500">/{{ invitation.slug }}</p>
+-                    <h3 class="mt-1 text-lg font-semibold text-slate-900">{{ invitation.title }}</h3>
+-                    <p class="text-sm text-slate-600">{{ invitation.subtitle }}</p>
+-
+-                    <div class="mt-3 flex gap-4 text-sm">
+-                        <Link :href="route('invitations.show', invitation.id)" class="text-sky-700">Ver</Link>
+-                        <Link :href="route('invitations.edit', invitation.id)" class="text-sky-700">Editar</Link>
+-                    </div>
+-                </div>
+-
+-                <p v-if="!invitations.length" class="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-500">
+-                    Todavia no tienes invitaciones.
+-                </p>
+-            </div>
+-        </div>
+-    </AuthenticatedLayout>
+-</template>
+diff --git a/routes/web.php b/routes/web.php
+index d24e567..6c89e0d 100644
+--- a/routes/web.php
++++ b/routes/web.php
+@@ -16,16 +16,16 @@ Route::get('/', function () {
+     ]);
+ });
+ 
+-Route::get('/dashboard', function () {
+-    return Inertia::render('Dashboard');
+-})->middleware(['auth', 'verified'])->name('dashboard');
++Route::get('/dashboard', [InvitationController::class, 'dashboard'])
++    ->middleware(['auth', 'verified'])
++    ->name('dashboard');
+ 
+ Route::middleware('auth')->group(function () {
+     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+ 
+-    Route::resource('invitations', InvitationController::class);
++    Route::resource('invitations', InvitationController::class)->except(['index']);
+ });
+ 
+ require __DIR__.'/auth.php';
