@@ -1,3 +1,31 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+    .public-invitation-section::before,
+    .public-invitation-section::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        z-index: 0;
+        height: 3rem;
+        pointer-events: none;
+    }
+
+    .public-invitation-section::before {
+        top: 0;
+        background: linear-gradient(to bottom, var(--page-bg, transparent), transparent);
+    }
+
+    .public-invitation-section::after {
+        bottom: 0;
+        background: linear-gradient(to bottom, transparent, var(--page-bg, transparent));
+    }
+
+    .public-invitation-section > * {
+        position: relative;
+        z-index: 1;
+    }
+}

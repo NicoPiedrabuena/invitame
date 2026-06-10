@@ -30,6 +30,7 @@ class InvitationController extends Controller
             'event_date',
             'venue_name',
             'created_at',
+            'updated_at',
         ]);
 
     return Inertia::render('Dashboard', [

@@ -17,7 +17,7 @@ const audioUrl = computed(() => props.invitation.theme_settings?.background_audi
 const mapEmbeddable = computed(() => props.invitation.google_maps_url?.includes('/maps/embed'));
 const sectionBackgrounds = computed(() => props.invitation.theme_settings?.section_backgrounds || {});
 const globalTypography = computed(() => props.invitation.theme_settings?.typography?.global || {});
-const pageBackgroundColor = computed(() => props.invitation.theme_settings?.appearance?.page_background_color || '#fff7ed');
+const pageBackgroundColor = computed(() => props.invitation.theme_settings?.appearance?.page_background_color || '#ffffff');
 const driveQrUrl = computed(() => {
     if (!props.invitation.drive_photos_url) {
         return null;
@@ -81,10 +81,6 @@ const coverStyle = computed(() => {
     };
 });
 
-const transitionStyle = computed(() => ({
-    background: `linear-gradient(180deg, transparent 0%, ${pageBackgroundColor.value} 50%, transparent 100%)`,
-}));
-
 const sectionBackgroundStyle = (sectionKey) => {
     const image = sectionBackgrounds.value?.[sectionKey];
     const imageUrl = resolvedImageUrl(image);
@@ -125,7 +121,7 @@ const togglePlay = async () => {
 </script>
 
 <template>
-    <div class="min-h-screen text-slate-900" :style="[secondaryTextStyle, { backgroundColor: pageBackgroundColor }]">
+    <div class="min-h-screen text-slate-900" :style="[secondaryTextStyle, { backgroundColor: pageBackgroundColor, '--page-bg': pageBackgroundColor }]">
         <section v-if="!hasStartedExperience" class="mx-auto flex min-h-screen w-full max-w-md flex-col justify-between px-6 pb-10 pt-12" :style="coverStyle">
             <div class="rounded-2xl bg-white/75 px-5 py-4 shadow-lg backdrop-blur-sm">
                 <p class="text-xs uppercase tracking-[0.2em]" :style="primaryTextStyle">Invitacion digital</p>
@@ -143,16 +139,14 @@ const togglePlay = async () => {
             </div>
         </section>
 
-        <section v-else class="mx-auto w-full max-w-md px-6 pb-16 pt-6">
-            <article class="relative mx-auto flex min-h-screen w-full max-w-md flex-col justify-center overflow-hidden rounded-[28px] border border-white/40 p-6 shadow-xl" :style="sectionBackgroundStyle('portada')">
+        <section v-else class="mx-auto w-full max-w-md pb-16">
+            <article class="public-invitation-section relative mx-auto flex min-h-screen w-full max-w-md flex-col justify-center overflow-hidden p-6" :style="sectionBackgroundStyle('portada')">
                 <div class="rounded-2xl bg-white/75 px-5 py-4 shadow-lg backdrop-blur-sm">
                     <p class="text-xs uppercase tracking-[0.2em]" :style="primaryTextStyle">Invitacion digital</p>
                     <h1 class="mt-4 text-5xl font-bold leading-tight" :style="primaryTextStyle">{{ invitation.title }}</h1>
                     <p class="mt-3 text-lg" :style="secondaryTextStyle">{{ invitation.subtitle }}</p>
                 </div>
             </article>
-
-            <div class="h-16 w-full" :style="transitionStyle" />
 
             <div class="grid grid-cols-2 gap-3" v-if="audioUrl">
                 <button class="rounded-2xl border border-slate-400 bg-white/80 px-4 py-2 text-sm" @click="togglePlay">
@@ -163,9 +157,7 @@ const togglePlay = async () => {
                 </button>
             </div>
 
-            <div class="h-16 w-full" :style="transitionStyle" v-if="audioUrl" />
-
-            <article class="relative mx-auto w-full max-w-md overflow-hidden rounded-[28px] border border-white/40 p-5 shadow-xl" :style="sectionBackgroundStyle('cuenta_regresiva')">
+            <article class="public-invitation-section relative mx-auto flex min-h-[70vh] w-full max-w-md flex-col justify-center overflow-hidden p-5" :style="sectionBackgroundStyle('cuenta_regresiva')">
                 <div class="rounded-2xl bg-white/75 px-5 py-4 shadow-lg backdrop-blur-sm">
                     <h2 class="text-lg font-semibold" :style="primaryTextStyle">Datos del evento</h2>
                     <p class="mt-2 text-sm">{{ invitation.event_date }}</p>
@@ -175,9 +167,7 @@ const togglePlay = async () => {
                 </div>
             </article>
 
-            <div class="h-16 w-full" :style="transitionStyle" v-if="invitation.spotify_playlist_url" />
-
-            <article class="relative mx-auto w-full max-w-md overflow-hidden rounded-[28px] border border-white/40 p-5 shadow-xl" v-if="invitation.spotify_playlist_url" :style="sectionBackgroundStyle('musica')">
+            <article class="public-invitation-section relative mx-auto flex min-h-[70vh] w-full max-w-md flex-col justify-center overflow-hidden p-5" v-if="invitation.spotify_playlist_url" :style="sectionBackgroundStyle('musica')">
                 <div class="rounded-2xl bg-white/75 px-5 py-4 shadow-lg backdrop-blur-sm">
                     <h2 class="text-lg font-semibold" :style="primaryTextStyle">Spotify</h2>
                     <iframe
@@ -189,9 +179,7 @@ const togglePlay = async () => {
                 </div>
             </article>
 
-            <div class="h-16 w-full" :style="transitionStyle" />
-
-            <article class="relative mx-auto w-full max-w-md overflow-hidden rounded-[28px] border border-white/40 p-5 shadow-xl" :style="sectionBackgroundStyle('ubicacion')">
+            <article class="public-invitation-section relative mx-auto flex min-h-[70vh] w-full max-w-md flex-col justify-center overflow-hidden p-5" :style="sectionBackgroundStyle('ubicacion')">
                 <div class="rounded-2xl bg-white/75 px-5 py-4 shadow-lg backdrop-blur-sm">
                     <h2 class="text-lg font-semibold" :style="primaryTextStyle">Google Maps</h2>
 
@@ -209,9 +197,7 @@ const togglePlay = async () => {
                 </div>
             </article>
 
-            <div class="h-16 w-full" :style="transitionStyle" v-if="invitation.gifts_message || invitation.bank_alias" />
-
-            <article class="relative mx-auto w-full max-w-md overflow-hidden rounded-[28px] border border-white/40 p-5 shadow-xl" v-if="invitation.gifts_message || invitation.bank_alias" :style="sectionBackgroundStyle('regalos')">
+            <article class="public-invitation-section relative mx-auto flex min-h-[70vh] w-full max-w-md flex-col justify-center overflow-hidden p-5" v-if="invitation.gifts_message || invitation.bank_alias" :style="sectionBackgroundStyle('regalos')">
                 <div class="rounded-2xl bg-white/75 px-5 py-4 shadow-lg backdrop-blur-sm">
                     <h2 class="text-lg font-semibold" :style="primaryTextStyle">Regalos</h2>
                     <p class="mt-2 text-sm" v-if="invitation.gifts_message">{{ invitation.gifts_message }}</p>
@@ -225,9 +211,7 @@ const togglePlay = async () => {
                 </div>
             </article>
 
-            <div class="h-16 w-full" :style="transitionStyle" v-if="invitation.drive_photos_url" />
-
-            <article class="relative mx-auto w-full max-w-md overflow-hidden rounded-[28px] border border-white/40 p-5 shadow-xl" v-if="invitation.drive_photos_url" :style="sectionBackgroundStyle('fotos')">
+            <article class="public-invitation-section relative mx-auto flex min-h-[70vh] w-full max-w-md flex-col justify-center overflow-hidden p-5" v-if="invitation.drive_photos_url" :style="sectionBackgroundStyle('fotos')">
                 <div class="rounded-2xl bg-white/75 px-5 py-4 shadow-lg backdrop-blur-sm">
                     <h2 class="text-lg font-semibold" :style="primaryTextStyle">Fotos</h2>
                     <img v-if="driveQrUrl" :src="driveQrUrl" alt="QR para Drive" class="mt-3 h-48 w-48 rounded-2xl bg-white p-3" />
@@ -237,9 +221,7 @@ const togglePlay = async () => {
                 </div>
             </article>
 
-            <div class="h-16 w-full" :style="transitionStyle" v-if="invitation.message_wall_enabled" />
-
-            <article class="relative mx-auto w-full max-w-md overflow-hidden rounded-[28px] border border-white/40 p-5 shadow-xl" v-if="invitation.message_wall_enabled" :style="sectionBackgroundStyle('muro')">
+            <article class="public-invitation-section relative mx-auto flex min-h-[70vh] w-full max-w-md flex-col justify-center overflow-hidden p-5" v-if="invitation.message_wall_enabled" :style="sectionBackgroundStyle('muro')">
                 <div class="rounded-2xl bg-white/75 px-5 py-4 shadow-lg backdrop-blur-sm">
                     <h2 class="text-lg font-semibold" :style="primaryTextStyle">Muro de mensajes</h2>
                     <div class="mt-3 rounded-2xl bg-slate-50 p-4 text-sm">
@@ -248,9 +230,7 @@ const togglePlay = async () => {
                 </div>
             </article>
 
-            <div class="h-16 w-full" :style="transitionStyle" v-if="invitation.rsvp_deadline || invitation.rsvp_message || invitation.rsvp_companions?.length" />
-
-            <article class="relative mx-auto w-full max-w-md overflow-hidden rounded-[28px] border border-white/40 p-5 shadow-xl" v-if="invitation.rsvp_deadline || invitation.rsvp_message || invitation.rsvp_companions?.length" :style="sectionBackgroundStyle('rsvp')">
+            <article class="public-invitation-section relative mx-auto flex min-h-[70vh] w-full max-w-md flex-col justify-center overflow-hidden p-5" v-if="invitation.rsvp_deadline || invitation.rsvp_message || invitation.rsvp_companions?.length" :style="sectionBackgroundStyle('rsvp')">
                 <div class="rounded-2xl bg-white/75 px-5 py-4 shadow-lg backdrop-blur-sm">
                     <h2 class="text-lg font-semibold" :style="primaryTextStyle">RSVP</h2>
                     <p class="mt-2 text-sm" v-if="invitation.rsvp_deadline">Confirmar antes de: {{ invitation.rsvp_deadline }}</p>
@@ -265,9 +245,7 @@ const togglePlay = async () => {
                 </div>
             </article>
 
-            <div class="h-16 w-full" :style="transitionStyle" v-if="invitation.dress_code_allowed_images?.length || invitation.dress_code_not_allowed_images?.length" />
-
-            <article class="relative mx-auto w-full max-w-md overflow-hidden rounded-[28px] border border-white/40 p-5 shadow-xl" v-if="invitation.dress_code_allowed_images?.length || invitation.dress_code_not_allowed_images?.length" :style="sectionBackgroundStyle('dress_code')">
+            <article class="public-invitation-section relative mx-auto flex min-h-[70vh] w-full max-w-md flex-col justify-center overflow-hidden p-5" v-if="invitation.dress_code_allowed_images?.length || invitation.dress_code_not_allowed_images?.length" :style="sectionBackgroundStyle('dress_code')">
                 <div class="rounded-2xl bg-white/75 px-5 py-4 shadow-lg backdrop-blur-sm">
                     <h2 class="text-lg font-semibold" :style="primaryTextStyle">Referencias visuales</h2>
 

@@ -4,8 +4,7 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import { computed, onBeforeUnmount, ref } from 'vue';
 
 
@@ -21,6 +20,36 @@ const props = defineProps({
 });
 
 const isEditing = computed(() => props.mode === 'edit' && props.invitation);
+const page = usePage();
+const user = computed(() => page.props.auth.user);
+
+const theme = {
+    shell: '#f7eee6',
+    app: '#fff7ef',
+    frame: '#d8c8b6',
+    sidebar: '#faead7',
+    surface: '#fffaf5',
+    card: '#ffffff',
+    surfaceMuted: '#efe7dc',
+    line: '#ead8c2',
+    ink: '#15120f',
+    muted: '#7c7168',
+    accent: '#40540f',
+    accentSoft: '#e9ddcc',
+    tag: '#4b5f18',
+    warm: '#a36d46',
+};
+
+const initials = computed(() => {
+    const name = user.value?.name || 'Usuario';
+
+    return name
+        .split(' ')
+        .map((part) => part[0])
+        .join('')
+        .slice(0, 2)
+        .toUpperCase();
+});
 
 const fontOptions = [
     { label: 'Serif clásica', value: 'classic_serif' },
@@ -51,6 +80,9 @@ const steps = [
 ];
 
 const defaultThemeSettings = {
+    appearance: {
+        page_background_color: '#ffffff',
+    },
     section_backgrounds: {
         portada: null,
         cuenta_regresiva: null,
@@ -75,6 +107,35 @@ const defaultThemeSettings = {
         },
     },
 };
+
+const initialThemeSettings = computed(() => {
+    const existingThemeSettings = props.invitation?.theme_settings ?? {};
+
+    return {
+        ...defaultThemeSettings,
+        ...existingThemeSettings,
+        appearance: {
+            ...defaultThemeSettings.appearance,
+            ...(existingThemeSettings.appearance ?? {}),
+        },
+        section_backgrounds: {
+            ...defaultThemeSettings.section_backgrounds,
+            ...(existingThemeSettings.section_backgrounds ?? {}),
+        },
+        typography: {
+            global: {
+                primary: {
+                    ...defaultThemeSettings.typography.global.primary,
+                    ...(existingThemeSettings.typography?.global?.primary ?? {}),
+                },
+                secondary: {
+                    ...defaultThemeSettings.typography.global.secondary,
+                    ...(existingThemeSettings.typography?.global?.secondary ?? {}),
+                },
+            },
+        },
+    };
+});
 
 const form = useForm({
     title: props.invitation?.title ?? '',
@@ -101,7 +162,7 @@ const form = useForm({
         : '',
     rsvp_companions: props.invitation?.rsvp_companions ?? [],
     rsvp_message: props.invitation?.rsvp_message ?? '',
-    theme_settings: props.invitation?.theme_settings ?? defaultThemeSettings,
+    theme_settings: initialThemeSettings.value,
 
     background_portada: null,
     background_cuenta_regresiva: null,
@@ -127,7 +188,6 @@ const resolvedImageUrl = (path) => {
 };
 
 const currentStep = ref(1);
-const hasEnteredWizard = ref(isEditing.value);
 const allowedPreviewUrls = ref([]);
 const notAllowedPreviewUrls = ref([]);
 const backgroundPreviewUrls = ref({
@@ -212,10 +272,6 @@ const removeCompanion = (index) => {
     form.rsvp_companions.splice(index, 1);
 };
 
-const enterWizard = () => {
-    hasEnteredWizard.value = true;
-};
-
 const nextStep = () => {
     if (currentStep.value < steps.length) {
         currentStep.value += 1;
@@ -264,8 +320,56 @@ onBeforeUnmount(() => {
 <template>
     <Head :title="isEditing ? 'Editar invitación' : 'Crear invitación'" />
 
-    <AuthenticatedLayout>
-        <template #header>
+    <div class="min-h-screen p-0 font-sans md:p-2" :style="{ backgroundColor: theme.shell, color: theme.ink }">
+        <div class="mx-auto grid min-h-screen max-w-7xl overflow-hidden border shadow-sm md:min-h-[calc(100vh-1rem)] md:grid-cols-[202px_1fr] md:rounded-[22px]" :style="{ backgroundColor: theme.app, borderColor: theme.frame }">
+            <aside class="hidden flex-col justify-between px-5 py-6 md:flex" :style="{ backgroundColor: theme.sidebar }">
+                <div>
+                    <Link :href="route('dashboard')" class="block font-serif text-xl leading-tight" :style="{ color: theme.ink }">
+                        Celebration<br />
+                        Memories
+                    </Link>
+                    <p class="mt-1 text-xs tracking-wide" :style="{ color: theme.muted }">Momentos que perduran</p>
+
+                    <nav class="mt-8 space-y-2 text-sm">
+                        <Link class="flex items-center gap-3 rounded-lg px-3 py-3 transition hover:bg-white/45" :href="route('dashboard')">
+                            <span class="text-base">⌘</span>
+                            Panel
+                        </Link>
+                        <Link class="flex items-center gap-3 rounded-lg px-3 py-3 font-semibold" :style="{ backgroundColor: theme.accentSoft, color: theme.accent }" :href="route('invitations.create')">
+                            <span class="text-base">＋</span>
+                            Crear invitación
+                        </Link>
+                        <Link class="flex items-center gap-3 rounded-lg px-3 py-3 transition hover:bg-white/45" :href="route('dashboard')">
+                            <span class="text-base">▣</span>
+                            Galería
+                        </Link>
+                        <Link class="flex items-center gap-3 rounded-lg px-3 py-3 transition hover:bg-white/45" :href="route('dashboard')">
+                            <span class="text-base">✉</span>
+                            Mis Invitaciones
+                        </Link>
+                    </nav>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3 rounded-lg bg-white/60 p-3">
+                        <div class="grid h-8 w-8 place-items-center rounded-full text-xs font-bold text-white" :style="{ backgroundColor: theme.ink }">
+                            {{ initials }}
+                        </div>
+                        <div class="min-w-0">
+                            <p class="truncate text-xs font-bold">{{ user.name }}</p>
+                            <p class="text-[10px]" :style="{ color: theme.muted }">Premium Account</p>
+                        </div>
+                    </div>
+
+                    <Link :href="route('logout')" method="post" as="button" class="flex items-center gap-3 px-3 text-sm">
+                        <span>↪</span>
+                        Cerrar sesión
+                    </Link>
+                </div>
+            </aside>
+
+            <main class="px-4 py-6 md:p-9">
+        <template v-if="false">
             <div class="flex items-center justify-between gap-3">
               <h2 class="text-xl font-semibold leading-tight text-gray-800">
     {{ isEditing ? 'Editar invitación' : 'Crear invitación' }}
@@ -274,35 +378,32 @@ onBeforeUnmount(() => {
             </div>
         </template>
 
-        <div class="py-4">
-            <div class="mx-auto max-w-md px-4 pb-28">
-                <div v-if="!hasEnteredWizard" class="rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-700 p-6 text-white shadow-xl">
-                    <p class="text-xs uppercase tracking-[0.2em] text-slate-300">Creador de invitaciones</p>
-                    <h3 class="mt-3 text-2xl font-semibold leading-tight">Ingresá y comenzá a crear tu invitación</h3>
-                    <p class="mt-3 text-sm text-slate-300">Cuando presiones Ingresar se abrirá el asistente paso a paso.</p>
+                <div class="mb-8 flex items-start justify-between gap-4">
+                    <div>
+                        <p class="text-xs uppercase tracking-[0.22em]" :style="{ color: theme.muted }">Creador de invitaciones</p>
+                        <h1 class="mt-2 font-serif text-4xl leading-tight md:text-[38px]">
+                            {{ isEditing ? 'Editar invitación' : 'Crear invitación' }}
+                        </h1>
+                        <p class="mt-3 max-w-xl text-sm leading-6">Personaliza portada, fondos, música, ubicación y confirmaciones desde un asistente simple.</p>
+                    </div>
 
-                    <button
-                        type="button"
-                        class="mt-6 flex w-full items-center justify-center rounded-2xl bg-amber-400 px-5 py-4 text-base font-semibold text-slate-950 transition active:scale-[0.99]"
-                        @click="enterWizard"
-                    >
-                        Ingresar
-                    </button>
+                    <span class="hidden rounded-full px-3 py-1 text-xs font-semibold md:inline-flex" :style="{ backgroundColor: theme.accentSoft, color: theme.accent }">Paso {{ currentStep }} de {{ steps.length }}</span>
                 </div>
 
-                <template v-else>
-                <div class="mb-4 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
+                <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_250px]">
+                    <div class="mx-auto w-full max-w-2xl pb-24">
+                <div class="mb-4 rounded-2xl border p-4 shadow-sm" :style="{ backgroundColor: theme.card, borderColor: theme.line }">
                     <div class="flex items-start justify-between gap-3">
                         <div>
                             <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Wizard móvil</p>
-                            <h3 class="mt-1 text-lg font-semibold text-slate-900">{{ currentStepInfo.title }}</h3>
-                            <p class="text-sm text-slate-500">{{ currentStepInfo.description }}</p>
+                            <h3 class="mt-1 font-serif text-xl font-semibold" :style="{ color: theme.ink }">{{ currentStepInfo.title }}</h3>
+                            <p class="text-sm" :style="{ color: theme.muted }">{{ currentStepInfo.description }}</p>
                         </div>
-                        <span class="rounded-2xl bg-slate-900 px-3 py-2 text-sm font-semibold text-white">{{ currentStep }}</span>
+                        <span class="rounded-2xl px-3 py-2 text-sm font-semibold text-white" :style="{ backgroundColor: theme.accent }">{{ currentStep }}</span>
                     </div>
 
-                    <div class="mt-4 h-2 w-full overflow-hidden rounded-full bg-slate-100">
-                        <div class="h-full rounded-full bg-amber-400 transition-all" :style="{ width: `${progressPercent}%` }" />
+                    <div class="mt-4 h-2 w-full overflow-hidden rounded-full" :style="{ backgroundColor: theme.accentSoft }">
+                        <div class="h-full rounded-full transition-all" :style="{ width: `${progressPercent}%`, backgroundColor: theme.accent }" />
                     </div>
                 </div>
 
@@ -311,6 +412,21 @@ onBeforeUnmount(() => {
                         <div class="space-y-2">
                             <p class="text-sm font-semibold text-slate-900">Texto global de portada</p>
                             <p class="text-xs text-slate-500">Cada bloque reúne input, estilo y preview para evitar scroll.</p>
+                        </div>
+
+                        <div class="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                            <div class="flex items-center justify-between gap-3">
+                                <div>
+                                    <p class="text-sm font-semibold text-slate-900">Fondo general</p>
+                                    <p class="text-xs text-slate-500">Color de fondo de toda la web.</p>
+                                </div>
+                                <span class="h-9 w-9 rounded-full border border-slate-300" :style="{ backgroundColor: form.theme_settings.appearance.page_background_color }" />
+                            </div>
+
+                            <div>
+                                <InputLabel for="page_background_color" value="Color de fondo general" />
+                                <input id="page_background_color" v-model="form.theme_settings.appearance.page_background_color" type="color" class="mt-2 block h-12 w-full rounded-2xl border border-slate-300 bg-white p-1" />
+                            </div>
                         </div>
 
                         <div class="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
@@ -632,8 +748,8 @@ onBeforeUnmount(() => {
                         Revisa los campos marcados antes de continuar.
                     </div>
 
-                    <div class="fixed inset-x-0 bottom-0 border-t border-slate-200 bg-white/95 px-4 py-4 backdrop-blur">
-                        <div class="mx-auto flex max-w-md gap-3">
+                    <div class="sticky bottom-0 -mx-1 mt-6 border-t px-1 py-4 backdrop-blur" :style="{ backgroundColor: `${theme.app}e6`, borderColor: theme.line }">
+                        <div class="mx-auto flex max-w-2xl gap-3">
                             <SecondaryButton type="button" class="flex-1 justify-center py-3 text-sm" :disabled="isFirstStep" @click="previousStep">
                                 Anterior
                             </SecondaryButton>
@@ -644,8 +760,35 @@ onBeforeUnmount(() => {
                         </div>
                     </div>
                 </form>
-                </template>
-            </div>
+                    </div>
+
+                    <aside class="space-y-6">
+                        <section class="rounded-2xl border p-5" :style="{ backgroundColor: theme.surfaceMuted, borderColor: theme.line }">
+                            <p class="text-xs uppercase tracking-[0.2em]" :style="{ color: theme.muted }">Paso actual</p>
+                            <h2 class="mt-3 font-serif text-2xl" :style="{ color: theme.accent }">{{ currentStepInfo.title }}</h2>
+                            <p class="mt-2 text-sm leading-6" :style="{ color: theme.muted }">{{ currentStepInfo.description }}</p>
+                        </section>
+
+                        <section class="rounded-2xl border p-5" :style="{ backgroundColor: theme.card, borderColor: theme.line }">
+                            <p class="text-xs uppercase tracking-[0.2em]" :style="{ color: theme.muted }">Progreso</p>
+                            <p class="mt-3 font-serif text-4xl">{{ currentStep }}/{{ steps.length }}</p>
+                            <div class="mt-4 space-y-2">
+                                <button
+                                    v-for="step in steps"
+                                    :key="step.id"
+                                    type="button"
+                                    class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs transition"
+                                    :style="step.id === currentStep ? { backgroundColor: theme.accentSoft, color: theme.accent } : { color: theme.muted }"
+                                    @click="currentStep = step.id"
+                                >
+                                    <span class="grid h-5 w-5 place-items-center rounded-full text-[10px] font-bold" :style="step.id === currentStep ? { backgroundColor: theme.accent, color: '#ffffff' } : { backgroundColor: theme.surfaceMuted, color: theme.muted }">{{ step.id }}</span>
+                                    <span class="truncate">{{ step.title }}</span>
+                                </button>
+                            </div>
+                        </section>
+                    </aside>
+                </div>
+            </main>
         </div>
-    </AuthenticatedLayout>
+    </div>
 </template>
