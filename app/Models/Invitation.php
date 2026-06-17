@@ -16,6 +16,7 @@ class Invitation extends Model
         'title',
         'subtitle',
         'event_date',
+        'event_end_date',
         'venue_name',
         'address',
         'google_maps_url',
@@ -39,6 +40,7 @@ class Invitation extends Model
     {
         return [
             'event_date' => 'datetime',
+            'event_end_date' => 'datetime',
             'rsvp_deadline' => 'datetime',
             'message_wall_enabled' => 'boolean',
             'dress_code_allowed_images' => 'array',

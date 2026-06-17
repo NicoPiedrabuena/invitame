@@ -82,6 +82,7 @@ const steps = [
 const defaultThemeSettings = {
     appearance: {
         page_background_color: '#ffffff',
+        repeat_background_all_sections: false,
     },
     section_backgrounds: {
         portada: null,
@@ -143,6 +144,9 @@ const form = useForm({
     event_date: props.invitation?.event_date
         ? props.invitation.event_date.slice(0, 16)
         : '',
+    event_end_date: props.invitation?.event_end_date
+        ? props.invitation.event_end_date.slice(0, 16)
+        : '',
     venue_name: props.invitation?.venue_name ?? '',
     address: props.invitation?.address ?? '',
     google_maps_url: props.invitation?.google_maps_url ?? '',
@@ -190,16 +194,18 @@ const resolvedImageUrl = (path) => {
 const currentStep = ref(1);
 const allowedPreviewUrls = ref([]);
 const notAllowedPreviewUrls = ref([]);
+const repeatsInitialSectionBackground = Boolean(initialThemeSettings.value.appearance.repeat_background_all_sections);
+const sharedInitialBackground = resolvedImageUrl(existingSectionBackgrounds.value.portada);
 const backgroundPreviewUrls = ref({
     portada: resolvedImageUrl(existingSectionBackgrounds.value.portada),
-    cuenta_regresiva: resolvedImageUrl(existingSectionBackgrounds.value.cuenta_regresiva),
-    ubicacion: resolvedImageUrl(existingSectionBackgrounds.value.ubicacion),
-    dress_code: resolvedImageUrl(existingSectionBackgrounds.value.dress_code),
-    regalos: resolvedImageUrl(existingSectionBackgrounds.value.regalos),
-    fotos: resolvedImageUrl(existingSectionBackgrounds.value.fotos),
-    musica: resolvedImageUrl(existingSectionBackgrounds.value.musica),
-    muro: resolvedImageUrl(existingSectionBackgrounds.value.muro),
-    rsvp: resolvedImageUrl(existingSectionBackgrounds.value.rsvp),
+    cuenta_regresiva: repeatsInitialSectionBackground ? sharedInitialBackground : resolvedImageUrl(existingSectionBackgrounds.value.cuenta_regresiva),
+    ubicacion: repeatsInitialSectionBackground ? sharedInitialBackground : resolvedImageUrl(existingSectionBackgrounds.value.ubicacion),
+    dress_code: repeatsInitialSectionBackground ? sharedInitialBackground : resolvedImageUrl(existingSectionBackgrounds.value.dress_code),
+    regalos: repeatsInitialSectionBackground ? sharedInitialBackground : resolvedImageUrl(existingSectionBackgrounds.value.regalos),
+    fotos: repeatsInitialSectionBackground ? sharedInitialBackground : resolvedImageUrl(existingSectionBackgrounds.value.fotos),
+    musica: repeatsInitialSectionBackground ? sharedInitialBackground : resolvedImageUrl(existingSectionBackgrounds.value.musica),
+    muro: repeatsInitialSectionBackground ? sharedInitialBackground : resolvedImageUrl(existingSectionBackgrounds.value.muro),
+    rsvp: repeatsInitialSectionBackground ? sharedInitialBackground : resolvedImageUrl(existingSectionBackgrounds.value.rsvp),
 });
 
 const currentStepInfo = computed(() => steps[currentStep.value - 1]);
@@ -208,6 +214,7 @@ const isFirstStep = computed(() => currentStep.value === 1);
 const isLastStep = computed(() => currentStep.value === steps.length);
 const canShowBankButton = computed(() => form.bank_alias.trim().length > 0);
 const hasErrors = computed(() => Object.keys(form.errors).length > 0);
+const usesSharedSectionBackground = computed(() => Boolean(form.theme_settings.appearance.repeat_background_all_sections));
 const primaryPreviewStyle = computed(() => {
     const primary = form.theme_settings.typography.global.primary;
 
@@ -259,6 +266,52 @@ const syncBackgroundFile = (event, field, sectionKey) => {
 
     form[field] = file;
     backgroundPreviewUrls.value[sectionKey] = URL.createObjectURL(file);
+
+    if (sectionKey === 'portada' && usesSharedSectionBackground.value) {
+        syncSharedBackgroundPreviews(backgroundPreviewUrls.value.portada);
+    }
+};
+
+const syncSharedBackgroundPreviews = (previewUrl = backgroundPreviewUrls.value.portada) => {
+    Object.keys(backgroundPreviewUrls.value).forEach((sectionKey) => {
+        backgroundPreviewUrls.value[sectionKey] = previewUrl;
+    });
+};
+
+const clearSecondaryBackgroundFiles = () => {
+    [
+        'background_cuenta_regresiva',
+        'background_ubicacion',
+        'background_dress_code',
+        'background_regalos',
+        'background_fotos',
+        'background_musica',
+        'background_muro',
+        'background_rsvp',
+    ].forEach((field) => {
+        form[field] = null;
+    });
+};
+
+const toggleSharedSectionBackground = () => {
+    form.theme_settings.appearance.repeat_background_all_sections = !usesSharedSectionBackground.value;
+
+    if (usesSharedSectionBackground.value) {
+        clearSecondaryBackgroundFiles();
+        syncSharedBackgroundPreviews();
+    } else {
+        backgroundPreviewUrls.value = {
+            portada: backgroundPreviewUrls.value.portada,
+            cuenta_regresiva: resolvedImageUrl(existingSectionBackgrounds.value.cuenta_regresiva),
+            ubicacion: resolvedImageUrl(existingSectionBackgrounds.value.ubicacion),
+            dress_code: resolvedImageUrl(existingSectionBackgrounds.value.dress_code),
+            regalos: resolvedImageUrl(existingSectionBackgrounds.value.regalos),
+            fotos: resolvedImageUrl(existingSectionBackgrounds.value.fotos),
+            musica: resolvedImageUrl(existingSectionBackgrounds.value.musica),
+            muro: resolvedImageUrl(existingSectionBackgrounds.value.muro),
+            rsvp: resolvedImageUrl(existingSectionBackgrounds.value.rsvp),
+        };
+    }
 };
 
 const addCompanion = () => {
@@ -504,18 +557,45 @@ onBeforeUnmount(() => {
                             <p v-if="backgroundPreviewUrls.portada" class="mt-2 text-xs font-medium text-slate-500">Imagen actual / nueva imagen seleccionada</p>
                             <img v-if="backgroundPreviewUrls.portada" :src="backgroundPreviewUrls.portada" alt="Vista previa portada" class="mt-2 h-24 w-full rounded-2xl object-cover" />
                         </div>
+
+                        <button
+                            type="button"
+                            class="flex w-full items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left"
+                            @click="toggleSharedSectionBackground"
+                        >
+                            <span>
+                                <span class="block text-sm font-semibold text-slate-900">Repetir esta imagen en todas las secciones</span>
+                                <span class="mt-1 block text-xs text-slate-500">Si lo activas, en los siguientes pasos no se podrá elegir otra imagen de fondo.</span>
+                            </span>
+                            <span
+                                class="flex h-7 w-12 shrink-0 items-center rounded-full p-1 transition"
+                                :class="usesSharedSectionBackground ? 'bg-emerald-500' : 'bg-slate-300'"
+                            >
+                                <span
+                                    class="h-5 w-5 rounded-full bg-white shadow-sm transition-transform"
+                                    :class="usesSharedSectionBackground ? 'translate-x-5' : 'translate-x-0'"
+                                />
+                            </span>
+                        </button>
                     </section>
 
                     <section v-else-if="currentStep === 2" class="space-y-4 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
                         <div>
-                            <InputLabel for="event_date" value="Fecha y hora exacta" />
+                            <InputLabel for="event_date" value="Horario de inicio" />
                             <TextInput id="event_date" v-model="form.event_date" type="datetime-local" class="mt-2 block w-full" />
                             <InputError class="mt-2" :message="form.errors.event_date" />
                         </div>
 
                         <div>
+                            <InputLabel for="event_end_date" value="Horario de fin de fiesta" />
+                            <TextInput id="event_end_date" v-model="form.event_end_date" type="datetime-local" class="mt-2 block w-full" />
+                            <InputError class="mt-2" :message="form.errors.event_end_date" />
+                        </div>
+
+                        <div>
                             <InputLabel for="bg_cuenta" value="Fondo de cuenta regresiva (imagen)" />
-                            <input id="bg_cuenta" type="file" accept="image/*" class="mt-2 block w-full text-sm" @change="(event) => syncBackgroundFile(event, 'background_cuenta_regresiva', 'cuenta_regresiva')" />
+                            <p v-if="usesSharedSectionBackground" class="mt-2 rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">Esta sección usará la imagen de portada.</p>
+                            <input id="bg_cuenta" type="file" accept="image/*" class="mt-2 block w-full text-sm disabled:cursor-not-allowed disabled:opacity-40" :disabled="usesSharedSectionBackground" @change="(event) => syncBackgroundFile(event, 'background_cuenta_regresiva', 'cuenta_regresiva')" />
                             <InputError class="mt-2" :message="form.errors.background_cuenta_regresiva" />
                             <p v-if="backgroundPreviewUrls.cuenta_regresiva" class="mt-2 text-xs font-medium text-slate-500">Imagen actual / nueva imagen seleccionada</p>
                             <img v-if="backgroundPreviewUrls.cuenta_regresiva" :src="backgroundPreviewUrls.cuenta_regresiva" alt="Vista previa cuenta" class="mt-2 h-24 w-full rounded-2xl object-cover" />
@@ -543,7 +623,8 @@ onBeforeUnmount(() => {
 
                         <div>
                             <InputLabel for="bg_ubicacion" value="Fondo de ubicación (imagen)" />
-                            <input id="bg_ubicacion" type="file" accept="image/*" class="mt-2 block w-full text-sm" @change="(event) => syncBackgroundFile(event, 'background_ubicacion', 'ubicacion')" />
+                            <p v-if="usesSharedSectionBackground" class="mt-2 rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">Esta sección usará la imagen de portada.</p>
+                            <input id="bg_ubicacion" type="file" accept="image/*" class="mt-2 block w-full text-sm disabled:cursor-not-allowed disabled:opacity-40" :disabled="usesSharedSectionBackground" @change="(event) => syncBackgroundFile(event, 'background_ubicacion', 'ubicacion')" />
                             <InputError class="mt-2" :message="form.errors.background_ubicacion" />
                             <p v-if="backgroundPreviewUrls.ubicacion" class="mt-2 text-xs font-medium text-slate-500">Imagen actual / nueva imagen seleccionada</p>
                             <img v-if="backgroundPreviewUrls.ubicacion" :src="backgroundPreviewUrls.ubicacion" alt="Vista previa ubicación" class="mt-2 h-24 w-full rounded-2xl object-cover" />
@@ -601,7 +682,8 @@ onBeforeUnmount(() => {
 
                         <div>
                             <InputLabel for="bg_dress" value="Fondo de dress code (imagen)" />
-                            <input id="bg_dress" type="file" accept="image/*" class="mt-2 block w-full text-sm" @change="(event) => syncBackgroundFile(event, 'background_dress_code', 'dress_code')" />
+                            <p v-if="usesSharedSectionBackground" class="mt-2 rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">Esta sección usará la imagen de portada.</p>
+                            <input id="bg_dress" type="file" accept="image/*" class="mt-2 block w-full text-sm disabled:cursor-not-allowed disabled:opacity-40" :disabled="usesSharedSectionBackground" @change="(event) => syncBackgroundFile(event, 'background_dress_code', 'dress_code')" />
                             <InputError class="mt-2" :message="form.errors.background_dress_code" />
                             <p v-if="backgroundPreviewUrls.dress_code" class="mt-2 text-xs font-medium text-slate-500">Imagen actual / nueva imagen seleccionada</p>
                             <img v-if="backgroundPreviewUrls.dress_code" :src="backgroundPreviewUrls.dress_code" alt="Vista previa dress code" class="mt-2 h-24 w-full rounded-2xl object-cover" />
@@ -627,7 +709,8 @@ onBeforeUnmount(() => {
 
                         <div>
                             <InputLabel for="bg_regalos" value="Fondo de regalos (imagen)" />
-                            <input id="bg_regalos" type="file" accept="image/*" class="mt-2 block w-full text-sm" @change="(event) => syncBackgroundFile(event, 'background_regalos', 'regalos')" />
+                            <p v-if="usesSharedSectionBackground" class="mt-2 rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">Esta sección usará la imagen de portada.</p>
+                            <input id="bg_regalos" type="file" accept="image/*" class="mt-2 block w-full text-sm disabled:cursor-not-allowed disabled:opacity-40" :disabled="usesSharedSectionBackground" @change="(event) => syncBackgroundFile(event, 'background_regalos', 'regalos')" />
                             <InputError class="mt-2" :message="form.errors.background_regalos" />
                             <p v-if="backgroundPreviewUrls.regalos" class="mt-2 text-xs font-medium text-slate-500">Imagen actual / nueva imagen seleccionada</p>
                             <img v-if="backgroundPreviewUrls.regalos" :src="backgroundPreviewUrls.regalos" alt="Vista previa regalos" class="mt-2 h-24 w-full rounded-2xl object-cover" />
@@ -643,7 +726,8 @@ onBeforeUnmount(() => {
 
                         <div>
                             <InputLabel for="bg_fotos" value="Fondo de fotos (imagen)" />
-                            <input id="bg_fotos" type="file" accept="image/*" class="mt-2 block w-full text-sm" @change="(event) => syncBackgroundFile(event, 'background_fotos', 'fotos')" />
+                            <p v-if="usesSharedSectionBackground" class="mt-2 rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">Esta sección usará la imagen de portada.</p>
+                            <input id="bg_fotos" type="file" accept="image/*" class="mt-2 block w-full text-sm disabled:cursor-not-allowed disabled:opacity-40" :disabled="usesSharedSectionBackground" @change="(event) => syncBackgroundFile(event, 'background_fotos', 'fotos')" />
                             <InputError class="mt-2" :message="form.errors.background_fotos" />
                             <p v-if="backgroundPreviewUrls.fotos" class="mt-2 text-xs font-medium text-slate-500">Imagen actual / nueva imagen seleccionada</p>
                             <img v-if="backgroundPreviewUrls.fotos" :src="backgroundPreviewUrls.fotos" alt="Vista previa fotos" class="mt-2 h-24 w-full rounded-2xl object-cover" />
@@ -659,7 +743,8 @@ onBeforeUnmount(() => {
 
                         <div>
                             <InputLabel for="bg_musica" value="Fondo de música (imagen)" />
-                            <input id="bg_musica" type="file" accept="image/*" class="mt-2 block w-full text-sm" @change="(event) => syncBackgroundFile(event, 'background_musica', 'musica')" />
+                            <p v-if="usesSharedSectionBackground" class="mt-2 rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">Esta sección usará la imagen de portada.</p>
+                            <input id="bg_musica" type="file" accept="image/*" class="mt-2 block w-full text-sm disabled:cursor-not-allowed disabled:opacity-40" :disabled="usesSharedSectionBackground" @change="(event) => syncBackgroundFile(event, 'background_musica', 'musica')" />
                             <InputError class="mt-2" :message="form.errors.background_musica" />
                             <p v-if="backgroundPreviewUrls.musica" class="mt-2 text-xs font-medium text-slate-500">Imagen actual / nueva imagen seleccionada</p>
                             <img v-if="backgroundPreviewUrls.musica" :src="backgroundPreviewUrls.musica" alt="Vista previa música" class="mt-2 h-24 w-full rounded-2xl object-cover" />
@@ -688,7 +773,8 @@ onBeforeUnmount(() => {
 
                         <div>
                             <InputLabel for="bg_muro" value="Fondo de muro (imagen)" />
-                            <input id="bg_muro" type="file" accept="image/*" class="mt-2 block w-full text-sm" @change="(event) => syncBackgroundFile(event, 'background_muro', 'muro')" />
+                            <p v-if="usesSharedSectionBackground" class="mt-2 rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">Esta sección usará la imagen de portada.</p>
+                            <input id="bg_muro" type="file" accept="image/*" class="mt-2 block w-full text-sm disabled:cursor-not-allowed disabled:opacity-40" :disabled="usesSharedSectionBackground" @change="(event) => syncBackgroundFile(event, 'background_muro', 'muro')" />
                             <InputError class="mt-2" :message="form.errors.background_muro" />
                             <p v-if="backgroundPreviewUrls.muro" class="mt-2 text-xs font-medium text-slate-500">Imagen actual / nueva imagen seleccionada</p>
                             <img v-if="backgroundPreviewUrls.muro" :src="backgroundPreviewUrls.muro" alt="Vista previa muro" class="mt-2 h-24 w-full rounded-2xl object-cover" />
@@ -737,7 +823,8 @@ onBeforeUnmount(() => {
 
                         <div>
                             <InputLabel for="bg_rsvp" value="Fondo de RSVP (imagen)" />
-                            <input id="bg_rsvp" type="file" accept="image/*" class="mt-2 block w-full text-sm" @change="(event) => syncBackgroundFile(event, 'background_rsvp', 'rsvp')" />
+                            <p v-if="usesSharedSectionBackground" class="mt-2 rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">Esta sección usará la imagen de portada.</p>
+                            <input id="bg_rsvp" type="file" accept="image/*" class="mt-2 block w-full text-sm disabled:cursor-not-allowed disabled:opacity-40" :disabled="usesSharedSectionBackground" @change="(event) => syncBackgroundFile(event, 'background_rsvp', 'rsvp')" />
                             <InputError class="mt-2" :message="form.errors.background_rsvp" />
                             <p v-if="backgroundPreviewUrls.rsvp" class="mt-2 text-xs font-medium text-slate-500">Imagen actual / nueva imagen seleccionada</p>
                             <img v-if="backgroundPreviewUrls.rsvp" :src="backgroundPreviewUrls.rsvp" alt="Vista previa rsvp" class="mt-2 h-24 w-full rounded-2xl object-cover" />

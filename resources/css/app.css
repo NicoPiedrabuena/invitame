@@ -3,6 +3,38 @@
 @tailwind utilities;
 
 @layer components {
+    .cm-page {
+        @apply min-h-screen bg-[#f7eee6] text-[#15120f];
+    }
+
+    .cm-app-frame {
+        @apply border border-[#d8c8b6] bg-[#fff7ef] shadow-sm;
+    }
+
+    .cm-panel {
+        @apply border border-[#ead8c2] bg-white shadow-sm;
+    }
+
+    .cm-muted-panel {
+        @apply border border-[#ead8c2] bg-[#efe7dc];
+    }
+
+    .cm-eyebrow {
+        @apply text-[10px] font-semibold uppercase tracking-[0.22em] text-[#7c7168];
+    }
+
+    .cm-title {
+        @apply font-serif leading-tight text-[#15120f];
+    }
+
+    .cm-body {
+        @apply text-sm leading-6 text-[#7c7168];
+    }
+
+    .cm-link {
+        @apply text-sm font-semibold text-[#40540f] underline-offset-4 transition hover:underline focus:outline-none focus:ring-2 focus:ring-[#40540f] focus:ring-offset-2 focus:ring-offset-[#fff7ef];
+    }
+
     .public-invitation-section::before,
     .public-invitation-section::after {
         content: '';
@@ -27,5 +59,49 @@
     .public-invitation-section > * {
         position: relative;
         z-index: 1;
+    }
+
+    .invitation-enter-enter-active,
+    .invitation-enter-leave-active {
+        transition: opacity 650ms ease, transform 650ms ease, filter 650ms ease;
+    }
+
+    .invitation-enter-enter-from {
+        opacity: 0;
+        filter: blur(10px);
+        transform: translateY(28px) scale(0.98);
+    }
+
+    .invitation-enter-leave-to {
+        opacity: 0;
+        filter: blur(8px);
+        transform: translateY(-18px) scale(1.02);
+    }
+
+    .reveal-on-scroll {
+        opacity: 0;
+        transform: translateY(36px);
+        transition: opacity 800ms ease, transform 800ms ease;
+    }
+
+    .reveal-on-scroll.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .invitation-enter-enter-active,
+        .invitation-enter-leave-active,
+        .reveal-on-scroll {
+            transition: none;
+        }
+
+        .invitation-enter-enter-from,
+        .invitation-enter-leave-to,
+        .reveal-on-scroll {
+            opacity: 1;
+            filter: none;
+            transform: none;
+        }
     }
 }

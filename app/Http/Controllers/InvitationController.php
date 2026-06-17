@@ -28,6 +28,7 @@ class InvitationController extends Controller
             'title',
             'subtitle',
             'event_date',
+            'event_end_date',
             'venue_name',
             'created_at',
             'updated_at',
@@ -54,6 +55,7 @@ class InvitationController extends Controller
             'title' => ['required', 'string', 'max:255'],
             'subtitle' => ['nullable', 'string', 'max:255'],
             'event_date' => ['required', 'date'],
+            'event_end_date' => ['nullable', 'date', 'after_or_equal:event_date'],
             'venue_name' => ['required', 'string', 'max:255'],
             'address' => ['nullable', 'string', 'max:1000'],
             'google_maps_url' => ['required', 'url', 'max:2048'],
@@ -134,6 +136,14 @@ class InvitationController extends Controller
         }
 
         $themeSettings = $data['theme_settings'] ?? [];
+        if (data_get($themeSettings, 'appearance.repeat_background_all_sections')) {
+            $sharedBackground = $sectionBackgrounds['portada'] ?? null;
+
+            foreach ($backgroundMapping as $sectionKey) {
+                $sectionBackgrounds[$sectionKey] = $sharedBackground;
+            }
+        }
+
         $themeSettings['section_backgrounds'] = $sectionBackgrounds;
 
         $invitation = DB::transaction(function () use ($data, $allowedImages, $notAllowedImages, $slug, $legacyDressCode, $dressCodeDescription, $resolvedSpotifyPlaylistUrl, $themeSettings) {
@@ -143,6 +153,7 @@ class InvitationController extends Controller
                 'title' => $data['title'],
                 'subtitle' => $data['subtitle'] ?? null,
                 'event_date' => $data['event_date'],
+                'event_end_date' => $data['event_end_date'] ?? null,
                 'venue_name' => $data['venue_name'],
                 'address' => $data['address'] ?? null,
                 'google_maps_url' => $data['google_maps_url'],
@@ -204,6 +215,7 @@ class InvitationController extends Controller
             'slug' => ['nullable', 'string', 'max:120', 'alpha_dash', Rule::unique('invitations', 'slug')->ignore($invitation->id)],            'title' => ['required', 'string', 'max:255'],
             'subtitle' => ['nullable', 'string', 'max:255'],
             'event_date' => ['required', 'date'],
+            'event_end_date' => ['nullable', 'date', 'after_or_equal:event_date'],
             'venue_name' => ['required', 'string', 'max:255'],
             'address' => ['nullable', 'string', 'max:1000'],
             'google_maps_url' => ['required', 'url', 'max:2048'],
@@ -282,6 +294,14 @@ class InvitationController extends Controller
         }
 
         $themeSettings = $data['theme_settings'] ?? $invitation->theme_settings ?? [];
+        if (data_get($themeSettings, 'appearance.repeat_background_all_sections')) {
+            $sharedBackground = $sectionBackgrounds['portada'] ?? null;
+
+            foreach ($backgroundMapping as $sectionKey) {
+                $sectionBackgrounds[$sectionKey] = $sharedBackground;
+            }
+        }
+
         $themeSettings['section_backgrounds'] = $sectionBackgrounds;
         $data['slug'] = $data['slug'] ?? $invitation->slug;
         $invitation->update([
