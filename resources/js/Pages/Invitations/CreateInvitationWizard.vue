@@ -34,9 +34,9 @@ const theme = {
     line: '#ead8c2',
     ink: '#15120f',
     muted: '#7c7168',
-    accent: '#40540f',
+    accent: '#6d4aff',
     accentSoft: '#e9ddcc',
-    tag: '#4b5f18',
+    tag: '#7758f6',
     warm: '#a36d46',
 };
 
@@ -160,6 +160,7 @@ const form = useForm({
     bank_alias: props.invitation?.bank_alias ?? '',
     drive_photos_url: props.invitation?.drive_photos_url ?? '',
     spotify_iframe_code: props.invitation?.spotify_iframe_code ?? '',
+    youtube_music_url: props.invitation?.youtube_music_url ?? '',
     message_wall_enabled: Boolean(props.invitation?.message_wall_enabled ?? false),
     rsvp_deadline: props.invitation?.rsvp_deadline
         ? props.invitation.rsvp_deadline.slice(0, 16)
@@ -488,10 +489,49 @@ onBeforeUnmount(() => {
                                 <span class="rounded-full bg-amber-100 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-amber-800">Global principal</span>
                             </div>
 
+                            <div class="invitation-compact-style-row grid gap-3 md:grid-cols-[minmax(0,1.8fr)_minmax(180px,0.8fr)_56px] md:items-end">
+                                <div>
+                                    <InputLabel for="title_compact" value="Texto del tÃ­tulo" />
+                                    <TextInput id="title_compact" v-model="form.title" class="mt-2 block w-full" placeholder="Nos casamos" />
+                                    <InputError class="mt-2" :message="form.errors.title" />
+                                </div>
+
+                                <div>
+                                    <InputLabel for="global_primary_font_compact" value="Fuente" />
+                                    <select id="global_primary_font_compact" v-model="form.theme_settings.typography.global.primary.font_family" class="mt-2 block w-full rounded-2xl border-slate-300 bg-white p-3 text-sm shadow-sm focus:border-slate-900 focus:ring-slate-900">
+                                        <option v-for="font in fontOptions" :key="`title-compact-${font.value}`" :value="font.value">{{ font.label }}</option>
+                                    </select>
+                                </div>
+
+                                <label for="global_primary_color_compact" class="group relative block cursor-pointer">
+                                    <span class="sr-only">Color del tÃ­tulo</span>
+                                    <span class="block h-12 w-12 rounded-full border-4 border-white shadow ring-1 ring-slate-300 transition group-hover:scale-105" :style="{ backgroundColor: form.theme_settings.typography.global.primary.color }" />
+                                    <input id="global_primary_color_compact" v-model="form.theme_settings.typography.global.primary.color" type="color" class="absolute inset-0 h-12 w-12 cursor-pointer opacity-0" />
+                                </label>
+                            </div>
+
                             <div>
                                 <InputLabel for="title" value="Texto del título" />
                                 <TextInput id="title" v-model="form.title" class="mt-2 block w-full" placeholder="Nos casamos" />
                                 <InputError class="mt-2" :message="form.errors.title" />
+                            </div>
+
+                            <div class="invitation-inline-style-control">
+                                <div class="grid grid-cols-[minmax(0,1fr)_56px] items-end gap-3">
+                                    <div>
+                                        <InputLabel for="global_primary_font_inline" value="Fuente y color del tÃ­tulo" />
+                                        <select id="global_primary_font_inline" v-model="form.theme_settings.typography.global.primary.font_family" class="mt-2 block w-full rounded-2xl border-slate-300 bg-white p-3 text-sm shadow-sm focus:border-slate-900 focus:ring-slate-900">
+                                            <option v-for="font in fontOptions" :key="`title-inline-${font.value}`" :value="font.value">{{ font.label }}</option>
+                                        </select>
+                                    </div>
+
+                                    <label for="global_primary_color_inline" class="group relative block cursor-pointer">
+                                        <span class="sr-only">Color del tÃ­tulo</span>
+                                        <span class="block h-12 w-12 rounded-full border-4 border-white shadow ring-1 ring-slate-300 transition group-hover:scale-105" :style="{ backgroundColor: form.theme_settings.typography.global.primary.color }" />
+                                        <input id="global_primary_color_inline" v-model="form.theme_settings.typography.global.primary.color" type="color" class="absolute inset-0 h-12 w-12 cursor-pointer opacity-0" />
+                                    </label>
+                                </div>
+                                <p class="mt-1 text-xs text-slate-500">Actual: {{ getFontLabel(form.theme_settings.typography.global.primary.font_family) }}</p>
                             </div>
 
                             <div>
@@ -519,10 +559,49 @@ onBeforeUnmount(() => {
                                 <span class="rounded-full bg-sky-100 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-sky-800">Global secundaria</span>
                             </div>
 
+                            <div class="invitation-compact-style-row grid gap-3 md:grid-cols-[minmax(0,1.8fr)_minmax(180px,0.8fr)_56px] md:items-end">
+                                <div>
+                                    <InputLabel for="subtitle_compact" value="Texto del subtÃ­tulo" />
+                                    <TextInput id="subtitle_compact" v-model="form.subtitle" class="mt-2 block w-full" placeholder="Nico y Flor" />
+                                    <InputError class="mt-2" :message="form.errors.subtitle" />
+                                </div>
+
+                                <div>
+                                    <InputLabel for="global_secondary_font_compact" value="Fuente" />
+                                    <select id="global_secondary_font_compact" v-model="form.theme_settings.typography.global.secondary.font_family" class="mt-2 block w-full rounded-2xl border-slate-300 bg-white p-3 text-sm shadow-sm focus:border-slate-900 focus:ring-slate-900">
+                                        <option v-for="font in fontOptions" :key="`subtitle-compact-${font.value}`" :value="font.value">{{ font.label }}</option>
+                                    </select>
+                                </div>
+
+                                <label for="global_secondary_color_compact" class="group relative block cursor-pointer">
+                                    <span class="sr-only">Color del subtÃ­tulo</span>
+                                    <span class="block h-12 w-12 rounded-full border-4 border-white shadow ring-1 ring-slate-300 transition group-hover:scale-105" :style="{ backgroundColor: form.theme_settings.typography.global.secondary.color }" />
+                                    <input id="global_secondary_color_compact" v-model="form.theme_settings.typography.global.secondary.color" type="color" class="absolute inset-0 h-12 w-12 cursor-pointer opacity-0" />
+                                </label>
+                            </div>
+
                             <div>
                                 <InputLabel for="subtitle" value="Texto del subtítulo" />
                                 <TextInput id="subtitle" v-model="form.subtitle" class="mt-2 block w-full" placeholder="Nico y Flor" />
                                 <InputError class="mt-2" :message="form.errors.subtitle" />
+                            </div>
+
+                            <div class="invitation-inline-style-control">
+                                <div class="grid grid-cols-[minmax(0,1fr)_56px] items-end gap-3">
+                                    <div>
+                                        <InputLabel for="global_secondary_font_inline" value="Fuente y color del subtÃ­tulo" />
+                                        <select id="global_secondary_font_inline" v-model="form.theme_settings.typography.global.secondary.font_family" class="mt-2 block w-full rounded-2xl border-slate-300 bg-white p-3 text-sm shadow-sm focus:border-slate-900 focus:ring-slate-900">
+                                            <option v-for="font in fontOptions" :key="`subtitle-inline-${font.value}`" :value="font.value">{{ font.label }}</option>
+                                        </select>
+                                    </div>
+
+                                    <label for="global_secondary_color_inline" class="group relative block cursor-pointer">
+                                        <span class="sr-only">Color del subtÃ­tulo</span>
+                                        <span class="block h-12 w-12 rounded-full border-4 border-white shadow ring-1 ring-slate-300 transition group-hover:scale-105" :style="{ backgroundColor: form.theme_settings.typography.global.secondary.color }" />
+                                        <input id="global_secondary_color_inline" v-model="form.theme_settings.typography.global.secondary.color" type="color" class="absolute inset-0 h-12 w-12 cursor-pointer opacity-0" />
+                                    </label>
+                                </div>
+                                <p class="mt-1 text-xs text-slate-500">Actual: {{ getFontLabel(form.theme_settings.typography.global.secondary.font_family) }}</p>
                             </div>
 
                             <div>
@@ -544,12 +623,6 @@ onBeforeUnmount(() => {
                             </div>
                         </div>
 
-                        <div class="rounded-2xl border border-slate-200 bg-gradient-to-b from-white to-slate-50 p-4">
-                            <p class="text-xs uppercase tracking-wide text-slate-500">Preview combinado</p>
-                            <h4 class="mt-3 text-4xl font-bold leading-tight" :style="primaryPreviewStyle">{{ form.title || 'Nos casamos' }}</h4>
-                            <p class="mt-2 text-lg" :style="secondaryPreviewStyle">{{ form.subtitle || 'Nico y Flor' }}</p>
-                        </div>
-
                         <div>
                             <InputLabel for="bg_portada" value="Fondo de portada (imagen)" />
                             <input id="bg_portada" type="file" accept="image/*" class="mt-2 block w-full text-sm" @change="(event) => syncBackgroundFile(event, 'background_portada', 'portada')" />
@@ -569,7 +642,7 @@ onBeforeUnmount(() => {
                             </span>
                             <span
                                 class="flex h-7 w-12 shrink-0 items-center rounded-full p-1 transition"
-                                :class="usesSharedSectionBackground ? 'bg-emerald-500' : 'bg-slate-300'"
+                                :class="usesSharedSectionBackground ? 'bg-violet-500' : 'bg-slate-300'"
                             >
                                 <span
                                     class="h-5 w-5 rounded-full bg-white shadow-sm transition-transform"
@@ -736,6 +809,13 @@ onBeforeUnmount(() => {
 
                     <section v-else-if="currentStep === 7" class="space-y-4 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
                         <div>
+                            <InputLabel for="youtube_music_url" value="Canción de YouTube para la invitación" />
+                            <TextInput id="youtube_music_url" v-model="form.youtube_music_url" type="url" class="mt-2 block w-full" placeholder="https://www.youtube.com/watch?v=..." />
+                            <p class="mt-2 text-xs text-slate-500">Comenzará al ingresar y tendrá un control flotante para pausarla o reanudarla.</p>
+                            <InputError class="mt-2" :message="form.errors.youtube_music_url" />
+                        </div>
+
+                        <div>
                             <InputLabel for="spotify_iframe_code" value="Código iframe de Spotify" />
                             <textarea id="spotify_iframe_code" v-model="form.spotify_iframe_code" rows="6" class="mt-2 block w-full rounded-2xl border-slate-300 bg-slate-50 p-3 font-mono text-xs shadow-sm focus:border-slate-900 focus:ring-slate-900" placeholder='<iframe src="https://open.spotify.com/embed/playlist/..." />' />
                             <InputError class="mt-2" :message="form.errors.spotify_iframe_code" />
@@ -761,7 +841,7 @@ onBeforeUnmount(() => {
                             <button
                                 type="button"
                                 class="flex h-12 w-20 items-center rounded-full p-1 transition"
-                                :class="form.message_wall_enabled ? 'bg-emerald-500' : 'bg-slate-300'"
+                                :class="form.message_wall_enabled ? 'bg-violet-500' : 'bg-slate-300'"
                                 @click="form.message_wall_enabled = !form.message_wall_enabled"
                             >
                                 <span

@@ -70,6 +70,7 @@ class InvitationController extends Controller
             'drive_photos_url' => ['nullable', 'url', 'max:2048'],
             'spotify_playlist_url' => ['nullable', 'url', 'max:2048'],
             'spotify_iframe_code' => ['nullable', 'string', 'max:5000'],
+            'youtube_music_url' => ['nullable', 'url', 'max:2048'],
             'message_wall_enabled' => ['boolean'],
             'rsvp_deadline' => ['nullable', 'date'],
             'rsvp_companions' => ['nullable', 'array'],
@@ -166,6 +167,7 @@ class InvitationController extends Controller
                 'drive_photos_url' => $data['drive_photos_url'] ?? null,
                 'spotify_iframe_code' => $data['spotify_iframe_code'] ?? null,
                 'spotify_playlist_url' => $resolvedSpotifyPlaylistUrl,
+                'youtube_music_url' => $data['youtube_music_url'] ?? null,
                 'message_wall_enabled' => $data['message_wall_enabled'] ?? false,
                 'rsvp_deadline' => $data['rsvp_deadline'] ?? null,
                 'rsvp_companions' => $data['rsvp_companions'] ?? [],
@@ -185,9 +187,25 @@ class InvitationController extends Controller
     {
         $invitation = $this->ownedInvitation($invitation);
 
+        $rsvps = $invitation->rsvps()
+            ->latest()
+            ->get(['id', 'attending', 'guest_name', 'total_attendees', 'guests', 'message', 'created_at']);
+
+        $messages = $invitation->messages()
+            ->latest()
+            ->get(['id', 'guest_name', 'category', 'message', 'created_at']);
+
         return Inertia::render('Invitations/Show', [
             'invitation' => $invitation,
             'publicUrl' => url('/'.$invitation->slug),
+            'rsvps' => $rsvps,
+            'messages' => $messages,
+            'summary' => [
+                'confirmedGuests' => $rsvps->where('attending', true)->sum('total_attendees'),
+                'declinedResponses' => $rsvps->where('attending', false)->count(),
+                'responseCount' => $rsvps->count(),
+                'messageCount' => $messages->count(),
+            ],
         ]);
     }
 
@@ -230,6 +248,7 @@ class InvitationController extends Controller
             'drive_photos_url' => ['nullable', 'url', 'max:2048'],
             'spotify_playlist_url' => ['nullable', 'url', 'max:2048'],
             'spotify_iframe_code' => ['nullable', 'string', 'max:5000'],
+            'youtube_music_url' => ['nullable', 'url', 'max:2048'],
             'message_wall_enabled' => ['boolean'],
             'rsvp_deadline' => ['nullable', 'date'],
             'rsvp_companions' => ['nullable', 'array'],

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Model;
 
 class Invitation extends Model
@@ -29,8 +30,10 @@ class Invitation extends Model
         'drive_photos_url',
         'spotify_iframe_code',
         'spotify_playlist_url',
+        'youtube_music_url',
         'message_wall_enabled',
         'rsvp_deadline',
+        'rsvp_summary_sent_at',
         'rsvp_companions',
         'rsvp_message',
         'theme_settings',
@@ -42,6 +45,7 @@ class Invitation extends Model
             'event_date' => 'datetime',
             'event_end_date' => 'datetime',
             'rsvp_deadline' => 'datetime',
+            'rsvp_summary_sent_at' => 'datetime',
             'message_wall_enabled' => 'boolean',
             'dress_code_allowed_images' => 'array',
             'dress_code_not_allowed_images' => 'array',
@@ -53,5 +57,15 @@ class Invitation extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function messages(): HasMany
+    {
+        return $this->hasMany(InvitationMessage::class);
+    }
+
+    public function rsvps(): HasMany
+    {
+        return $this->hasMany(InvitationRsvp::class);
     }
 }

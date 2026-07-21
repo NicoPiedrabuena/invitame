@@ -35,7 +35,7 @@ const submit = () => {
 
         <div
             v-if="status"
-            class="mb-4 rounded-lg border border-[#b7c08d] bg-[#f2f5df] px-4 py-3 text-sm font-medium text-[#40540f]"
+            class="mb-4 rounded-lg border border-[#d7ceff] bg-[#f4f1ff] px-4 py-3 text-sm font-medium text-[#6d4aff]"
         >
             {{ status }}
         </div>

@@ -1,53 +1,55 @@
 <template>
-    <div class="cm-page p-0 font-sans md:p-2">
-        <div class="cm-app-frame mx-auto grid min-h-screen max-w-6xl overflow-hidden md:min-h-[calc(100vh-1rem)] md:grid-cols-[0.92fr_1fr] md:rounded-[22px]">
-            <section class="hidden flex-col justify-between bg-[#faead7] px-8 py-9 md:flex">
-                <div>
-                    <a href="/" class="block font-serif text-2xl leading-tight text-[#15120f]">
-                        Celebration<br />
-                        Memories
-                    </a>
-                    <p class="mt-2 text-xs tracking-wide text-[#7c7168]">Momentos que perduran</p>
+    <div class="relative min-h-screen overflow-hidden bg-[#f8f7fc] font-sans text-[#211b35]">
+        <div class="pointer-events-none absolute -left-40 -top-40 h-[34rem] w-[34rem] rounded-full bg-[#ded6ff]/75 blur-3xl" />
+        <div class="pointer-events-none absolute -bottom-48 right-[-8rem] h-[38rem] w-[38rem] rounded-full bg-[#ffe0ed]/75 blur-3xl" />
+
+        <header class="relative z-20 mx-auto flex max-w-7xl items-center justify-between px-5 py-5 md:px-8">
+            <a href="/" class="flex items-center gap-3 font-black tracking-[-0.04em]">
+                <span class="grid h-10 w-10 place-items-center rounded-xl bg-[#7657ff] text-white shadow-[0_8px_22px_rgba(118,87,255,.28)]">C</span>
+                <span class="text-xl">Celebration.</span>
+            </a>
+            <a href="/" class="rounded-full border border-black/[.07] bg-white/75 px-4 py-2 text-sm font-bold text-[#5f596c] shadow-sm backdrop-blur transition hover:border-[#b7a8ff] hover:text-[#6d4aff]">
+                Volver al inicio
+            </a>
+        </header>
+
+        <main class="relative z-10 mx-auto grid min-h-[calc(100vh-80px)] max-w-7xl items-center gap-12 px-5 pb-10 md:px-8 lg:grid-cols-[1fr_520px] lg:gap-20">
+            <section class="hidden max-w-xl lg:block">
+                <div class="inline-flex items-center gap-2 rounded-full border border-[#d7ceff] bg-white/70 px-4 py-2 text-xs font-extrabold uppercase tracking-[.16em] text-[#6d4aff] backdrop-blur">
+                    <span>✦</span> Tu celebración empieza acá
                 </div>
+                <h2 class="mt-7 text-6xl font-black leading-[.94] tracking-[-.06em]">
+                    Una invitación<br />tan única como<br /><span class="bg-gradient-to-r from-[#7657ff] to-[#e45b98] bg-clip-text text-transparent">tu historia.</span>
+                </h2>
+                <p class="mt-6 max-w-lg text-lg leading-8 text-[#6d6777]">
+                    Diseñá, compartí y administrá cada detalle del evento desde una experiencia simple y hermosa.
+                </p>
 
-                <div class="space-y-7">
-                    <div class="rounded-2xl border border-[#ead8c2] bg-[#fffaf5] p-5 shadow-sm">
-                        <p class="cm-eyebrow">Estudio digital</p>
-                        <h2 class="cm-title mt-4 text-4xl">Invitaciones con alma de recuerdo.</h2>
-                        <p class="cm-body mt-4">
-                            Diseña, guarda y comparte celebraciones con una experiencia cálida y cuidada de principio a fin.
-                        </p>
+                <div class="mt-10 grid grid-cols-3 gap-3">
+                    <div class="rounded-2xl border border-white/80 bg-white/65 p-4 shadow-[0_12px_40px_rgba(52,35,105,.06)] backdrop-blur">
+                        <span class="grid h-9 w-9 place-items-center rounded-xl bg-[#eee9ff] text-[#7657ff]">✦</span>
+                        <p class="mt-4 text-sm font-extrabold">Diseños únicos</p>
                     </div>
-
-                    <div class="grid grid-cols-2 gap-3 text-sm">
-                        <div class="rounded-xl bg-white/60 p-4">
-                            <p class="font-serif text-2xl text-[#40540f]">01</p>
-                            <p class="mt-2 text-xs text-[#7c7168]">Elige el estilo</p>
-                        </div>
-                        <div class="rounded-xl bg-white/60 p-4">
-                            <p class="font-serif text-2xl text-[#40540f]">02</p>
-                            <p class="mt-2 text-xs text-[#7c7168]">Personaliza detalles</p>
-                        </div>
+                    <div class="rounded-2xl border border-white/80 bg-white/65 p-4 shadow-[0_12px_40px_rgba(52,35,105,.06)] backdrop-blur">
+                        <span class="grid h-9 w-9 place-items-center rounded-xl bg-[#ffe8f1] text-[#d84f8d]">✓</span>
+                        <p class="mt-4 text-sm font-extrabold">RSVP online</p>
+                    </div>
+                    <div class="rounded-2xl border border-white/80 bg-white/65 p-4 shadow-[0_12px_40px_rgba(52,35,105,.06)] backdrop-blur">
+                        <span class="grid h-9 w-9 place-items-center rounded-xl bg-[#eee9ff] text-[#7657ff]">∞</span>
+                        <p class="mt-4 text-sm font-extrabold">Todo en uno</p>
                     </div>
                 </div>
-
-                <p class="text-xs italic text-[#7c7168]">Papel, textura y memoria en una misma pantalla.</p>
             </section>
 
-            <main class="flex min-h-screen items-center justify-center px-4 py-8 md:min-h-0 md:px-10">
-                <div class="w-full max-w-md">
-                    <div class="mb-8 md:hidden">
-                        <a href="/" class="font-serif text-2xl leading-tight text-[#15120f]">
-                            Celebration Memories
-                        </a>
-                        <p class="mt-1 text-xs tracking-wide text-[#7c7168]">Momentos que perduran</p>
+            <section class="flex items-center justify-center py-8 lg:py-12">
+                <div class="w-full max-w-[520px] rounded-[30px] border border-white/90 bg-white/85 p-6 shadow-[0_25px_80px_rgba(49,32,101,.12)] backdrop-blur-xl sm:p-9">
+                    <div class="mb-7 flex items-center gap-3 lg:hidden">
+                        <span class="h-1.5 w-10 rounded-full bg-[#7657ff]" />
+                        <p class="text-xs font-black uppercase tracking-[.16em] text-[#6d4aff]">Celebration</p>
                     </div>
-
-                    <div class="cm-panel rounded-2xl px-6 py-7 sm:px-8">
-                        <slot />
-                    </div>
+                    <slot />
                 </div>
-            </main>
-        </div>
+            </section>
+        </main>
     </div>
 </template>

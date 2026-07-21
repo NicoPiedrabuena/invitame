@@ -43,7 +43,7 @@ const submit = () => {
             <p class="cm-body mt-3">Entrá para seguir diseñando tus celebraciones y recuerdos guardados.</p>
         </div>
 
-        <div v-if="status" class="mb-4 rounded-lg border border-[#b7c08d] bg-[#f2f5df] px-4 py-3 text-sm font-medium text-[#40540f]">
+        <div v-if="status" class="mb-4 rounded-lg border border-[#d7ceff] bg-[#f4f1ff] px-4 py-3 text-sm font-medium text-[#6d4aff]">
             {{ status }}
         </div>
 
@@ -82,7 +82,7 @@ const submit = () => {
             <div class="block">
                 <label class="flex items-center">
                     <Checkbox name="remember" v-model:checked="form.remember" />
-                    <span class="ms-2 text-sm text-[#7c7168]"
+                    <span class="ms-2 text-sm text-[#716b79]"
                         >Recordarme</span
                     >
                 </label>
@@ -108,7 +108,7 @@ const submit = () => {
             <a
                 v-if="googleLoginUrl"
                 :href="googleLoginUrl"
-                class="inline-flex w-full items-center justify-center rounded-lg border border-[#d8c8b6] bg-[#fffaf5] px-4 py-3 text-sm font-semibold text-[#15120f] shadow-sm transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#40540f] focus:ring-offset-2 focus:ring-offset-[#fff7ef]"
+                class="inline-flex w-full items-center justify-center rounded-full border border-[#ded9e8] bg-white px-4 py-3 text-sm font-bold text-[#211b35] shadow-sm transition hover:border-[#b9aaff] hover:bg-[#faf9ff] focus:outline-none focus:ring-2 focus:ring-[#7657ff] focus:ring-offset-2"
             >
                 Continuar con Google
             </a>

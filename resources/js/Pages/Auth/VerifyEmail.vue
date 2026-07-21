@@ -34,7 +34,7 @@ const verificationLinkSent = computed(
         </div>
 
         <div
-            class="mb-4 rounded-lg border border-[#b7c08d] bg-[#f2f5df] px-4 py-3 text-sm font-medium text-[#40540f]"
+            class="mb-4 rounded-lg border border-[#d7ceff] bg-[#f4f1ff] px-4 py-3 text-sm font-medium text-[#6d4aff]"
             v-if="verificationLinkSent"
         >
             Enviamos un nuevo enlace de verificación a tu correo.

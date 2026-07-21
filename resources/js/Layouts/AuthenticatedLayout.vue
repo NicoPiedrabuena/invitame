@@ -36,14 +36,14 @@ const initials = computed(() => {
                                 <Link
                                     :href="route('dashboard')"
                                     class="rounded-lg px-4 py-2 text-sm font-semibold transition hover:bg-white/45"
-                                    :class="{ 'bg-[#e9ddcc] text-[#40540f]': route().current('dashboard') }"
+                                    :class="{ 'bg-[#eee9ff] text-[#6d4aff]': route().current('dashboard') }"
                                 >
                                     Panel
                                 </Link>
                                 <Link
                                     :href="route('invitations.create')"
                                     class="rounded-lg px-4 py-2 text-sm font-semibold transition hover:bg-white/45"
-                                    :class="{ 'bg-[#e9ddcc] text-[#40540f]': route().current('invitations.create') }"
+                                    :class="{ 'bg-[#eee9ff] text-[#6d4aff]': route().current('invitations.create') }"
                                 >
                                     Crear invitación
                                 </Link>
@@ -55,7 +55,7 @@ const initials = computed(() => {
                                 <template #trigger>
                                     <button
                                         type="button"
-                                        class="inline-flex items-center gap-3 rounded-full border border-[#ead8c2] bg-white/60 px-3 py-2 text-sm font-semibold text-[#15120f] transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#40540f] focus:ring-offset-2 focus:ring-offset-[#faead7]"
+                                        class="inline-flex items-center gap-3 rounded-full border border-[#ead8c2] bg-white/60 px-3 py-2 text-sm font-semibold text-[#15120f] transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#6d4aff] focus:ring-offset-2 focus:ring-offset-[#faead7]"
                                     >
                                         <span class="grid h-8 w-8 place-items-center rounded-full bg-[#15120f] text-xs font-bold text-white">
                                             {{ initials }}
@@ -83,7 +83,7 @@ const initials = computed(() => {
                         <div class="flex items-center sm:hidden">
                             <button
                                 @click="showingNavigationDropdown = !showingNavigationDropdown"
-                                class="inline-flex h-10 w-10 items-center justify-center rounded-lg text-[#15120f] transition hover:bg-white/45 focus:outline-none focus:ring-2 focus:ring-[#40540f]"
+                                class="inline-flex h-10 w-10 items-center justify-center rounded-lg text-[#15120f] transition hover:bg-white/45 focus:outline-none focus:ring-2 focus:ring-[#6d4aff]"
                                 aria-label="Abrir navegación"
                             >
                                 <span class="text-2xl leading-none">{{ showingNavigationDropdown ? '×' : '☰' }}</span>
